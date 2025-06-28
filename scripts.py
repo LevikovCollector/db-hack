@@ -1,6 +1,8 @@
 import datetime
 import random
 
+from django.core.exceptions import MultipleObjectsReturned
+
 from datacenter.models import Subject, Commendation, Lesson, Mark, Schoolkid, Chastisement
 
 phrases = [
@@ -43,9 +45,7 @@ def fix_marks(schoolkid: Schoolkid) -> None:
 
     :param schoolkid - объект с информацией об ученике
     """
-    for mark in Mark.objects.filter(schoolkid=schoolkid, points__in=[2, 3]):
-        mark.points = 5
-        mark.save()
+    Mark.objects.filter(schoolkid=schoolkid, points__in=[2, 3]).update(points=5)
 
 
 def remove_chastisements(schoolkid: Schoolkid) -> None:
@@ -54,8 +54,7 @@ def remove_chastisements(schoolkid: Schoolkid) -> None:
 
     :param schoolkid - объект с информацией об ученике
     """
-    for remark in Chastisement.objects.filter(schoolkid=schoolkid):
-        remark.delete()
+    Chastisement.objects.filter(schoolkid=schoolkid).delete()
 
 
 def create_commendation(schoolkid: Schoolkid, subject_title: str) -> None:
@@ -75,7 +74,7 @@ def create_commendation(schoolkid: Schoolkid, subject_title: str) -> None:
         print("Указанный предмет не существует")
     if subject and lesson:
         now = datetime.datetime.now()
-        if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=now).order_by('created'):
+        if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=now).order_by('-created'):
             print(f"По указанному предмету({subject_title}) уже есть похвала")
         else:
             Commendation.objects.create(text=random.choice(phrases), schoolkid=schoolkid, subject=subject[0],
@@ -84,9 +83,13 @@ def create_commendation(schoolkid: Schoolkid, subject_title: str) -> None:
 
 if __name__ == "__main__":
     try:
-        user = Schoolkid.objects.get(full_name__contains="Фролов Иван")
-        create_commendation(user, "Музыка")
+        user = Schoolkid.objects.get(full_name__contains="Нестерова Анна Владиславовна")
+        #create_commendation(user, "Музыка")
+        #remove_chastisements(user)
     except Schoolkid.DoesNotExist:
         print("Пользователь не найден")
+
+    except MultipleObjectsReturned:
+        print("Найдено более 1 записи")
 
 
