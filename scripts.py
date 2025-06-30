@@ -1,4 +1,3 @@
-import datetime
 import random
 
 from django.core.exceptions import MultipleObjectsReturned
@@ -73,19 +72,17 @@ def create_commendation(schoolkid: Schoolkid, subject_title: str) -> None:
     else:
         print("Указанный предмет не существует")
     if subject and lesson:
-        now = datetime.datetime.now()
-        if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=now).order_by('-created'):
+
+        if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=lesson[0].date).order_by('-created'):
             print(f"По указанному предмету({subject_title}) уже есть похвала")
         else:
             Commendation.objects.create(text=random.choice(phrases), schoolkid=schoolkid, subject=subject[0],
-                                    teacher=lesson[0].teacher, created=now)
+                                    teacher=lesson[0].teacher, created=lesson[0].date)
 
 
 if __name__ == "__main__":
     try:
-        user = Schoolkid.objects.get(full_name__contains="Нестерова Анна Владиславовна")
-        #create_commendation(user, "Музыка")
-        #remove_chastisements(user)
+        user = Schoolkid.objects.get(full_name__contains="Волкова Полина Вячеславовна")
     except Schoolkid.DoesNotExist:
         print("Пользователь не найден")
 
