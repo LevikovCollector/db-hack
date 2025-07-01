@@ -66,18 +66,18 @@ def create_commendation(schoolkid: Schoolkid, subject_title: str) -> None:
     """
     subject = Subject.objects.filter(title=subject_title, year_of_study=6)
     if subject:
-        lesson = Lesson.objects.filter(group_letter=schoolkid.group_letter, subject=subject[0])
+        lesson = Lesson.objects.filter(group_letter=schoolkid.group_letter, subject=subject[0]).order_by('-date').first()
         if not lesson:
             print("Указанного урока не существует")
     else:
         print("Указанный предмет не существует")
     if subject and lesson:
 
-        if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=lesson[0].date).order_by('-created'):
+        if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=lesson.date).order_by('-created'):
             print(f"По указанному предмету({subject_title}) уже есть похвала")
         else:
             Commendation.objects.create(text=random.choice(phrases), schoolkid=schoolkid, subject=subject[0],
-                                    teacher=lesson[0].teacher, created=lesson[0].date)
+                                    teacher=lesson.teacher, created=lesson.date)
 
 
 if __name__ == "__main__":
