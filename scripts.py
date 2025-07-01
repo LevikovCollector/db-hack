@@ -65,13 +65,13 @@ def create_commendation(schoolkid: Schoolkid, subject_title: str) -> None:
     :param subject_title - название  предмета по которому нужно добавить похвалу например 'Математика'
     """
     subject = Subject.objects.filter(title=subject_title, year_of_study=6)
-    if subject:
+    if subject.exists():
         lesson = Lesson.objects.filter(group_letter=schoolkid.group_letter, subject=subject[0]).order_by('-date').first()
         if not lesson:
             print("Указанного урока не существует")
     else:
         print("Указанный предмет не существует")
-    if subject and lesson:
+    if subject.exists() and lesson:
 
         if Commendation.objects.filter(schoolkid=schoolkid, subject=subject[0], created=lesson.date).order_by('-created'):
             print(f"По указанному предмету({subject_title}) уже есть похвала")
